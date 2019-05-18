@@ -1,32 +1,20 @@
-pipeline {
-    agent any
-
-    stages {
-        stage ('Compile Stage') {
-
-            steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn clean compile'
-                }
-            }
-        }
-
-        stage ('Testing Stage') {
-
-            steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn test'
-                }
-            }
-        }
-
-
-        stage ('Deployment Stage') {
-            steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn deploy'
-                }
-            }
-        }
-    }
+node{
+	stage('Checkout'){
+		//Checkout the code from a GitHub repository
+		git 'https://github.com/vijaybirru/hello-world.git'
+	}
+	stage('build'){
+		sh '"/opt/maven/bin/mvn" -V clean compile'
+	}
+               stage('test'){
+		sh '"/opt/maven/bin/mvn" -V clean test'
+	}
+	stage('package'){
+		sh '"/opt/maven/bin/mvn" -V clean package'
+	}
+	 stage('Deploy to Tomcat'){
+		 sshagent(['xnxnxnxn']) {
+			 sh 'scp -o StrictHostKeyChecking=no target/*.war ec2-user@54.185.155.164:/opt/tomcat/webapps/'
+      }
+}
 }
